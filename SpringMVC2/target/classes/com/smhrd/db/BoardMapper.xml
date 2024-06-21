@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smhrd.db.BoardMapper">
+	<select id="boardList" resultType="com.smhrd.model.BoardVO">
+		SELECT * FROM BOARD
+	</select>
+	
+	<!-- 글 작성하는 sql문 -->
+	<insert id="register" parameterType="com.smhrd.model.BoardVO">
+		INSERT INTO BOARD(TITLE, WRITER, CONTENT) 
+		values(#{title}, #{writer}, #{content})
+	</insert>
+	
+	
+	<!-- 검색기능 -->
+	<select id="search" 
+			resultType="com.smhrd.model.BoardVO" 
+			parameterType="com.smhrd.model.SearchCriteria"> <!-- SearchCriteria가 아래에 있는 searchOption으로 이동 -->
+		SELECT * FROM BOARD
+		<include refid="searchOption"/>
+	</select>
+	<!-- include refid :  자주 쓰는 중복 쿼리를 하나로 묶어서 모아줌 -->
+	
+	<!-- sql : 자주 사용하는 구문을 포함시킬 수 있게 ......약간 라이브러리 같은 역할 -->
+	<sql id="searchOption">
+		<!-- type이 작성자일 때 sql 구문 작성 -->
+		<if test="type == '작성자'">
+			<!-- % : 와일드카드로 사용되어 검색어ㅡ이 앞뒤에 아무 문자나 여러 개의 문자가 올 수 있음을 나타냄
+				 --> 검색조건
+			 -->
+			WHERE WRITER LIKE CONCAT('%', #{text}, '%') <!-- 내가 가져올 text 데이터와 % 합병  -->
+		</if>
+		<!-- type이 제목이었을 때 sql 구문 작성 -->
+		<if test="type == '제목'">
+			WHERE TITLE LIKE CONCAT('%', #{text}, '%')
+		</if>	
+	</sql>
+	
+
+	<!-- 자동완성 기능 -->
+	<!-- 선언한 쿼리 사용 : <include refId=""> -->
+	<select id="autocomplete" resultType="com.smhrd.model.BoardVO"
+		parameterType="com.smhrd.model.SearchCriteria">
+		<include refid="completeOption"/>
+		FROM BOARD
+	</select>
+	
+	<sql id="completeOption">
+		<if test="type=='작성자'">
+			SELECT DISTINCT(WRITER) 
+		</if>
+		<if test="type=='제목'">
+			SELECT TITLE 
+		</if>
+	</sql>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

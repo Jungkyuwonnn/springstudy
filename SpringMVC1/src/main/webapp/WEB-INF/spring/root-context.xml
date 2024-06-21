@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://mybatis.org/schema/mybatis-spring 
+    http://mybatis.org/schema/mybatis-spring-1.2.xsd">
+	
+	
+	<!-- DB 환경설정을 하는 파일 -->
+	<!-- 1. HikariCP 안에 있는 객체를 생성 ==> Connection  -->
+		<!-- HikariCP는 자바 라이브러리임 -->
+	<!-- beans란? 객체임 
+		하나만 사용하기 위해서 bean 사용함 
+	-->
+		<!-- class 단위로 묶음 / id : 유일한 거, 구분하기 위해서 -->
+	<!-- HikariConfig : HikariCP 환경설정을 위한 객체 -->
+	<!-- been은 객체 생성하는 또 다른 문법
+		 HikariConfig hikariConfig = new HikariConfig();
+		 hikariConfig.setXXXX("root");
+		 hikariConfig.setXXXX("1234");
+		 hikariConfig.setXXXX("~~~~");
+		 hikariConfig.setXXXX("~~~~");
+	 -->
+	 <!-- bean 문법 사용 -->
+	<bean class="com.zaxxer.hikari.HikariConfig" id="hikariConfig">
+		<!-- property : 속성 , hikariConfig 안에 있는 속성 사용-->
+			<!--  /> : 단독태그로 만듦 왜? 더 코드가 짧아지니까-->
+		<property name="username" value="root"/>
+		<property name="password" value="12345"/>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/bigdata"/>
+		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+	
+	</bean>
+	
+	<!-- 2. HikariDataSource : 위쪽에 있는 config 값을 기준으로 DBCP 생성-->
+	<!-- HikariDataSource dataSource = new HikariDataSource(hikariConfig) -->
+	<bean class="com.zaxxer.hikari.HikariDataSource" id="dataSource">
+		<!-- constructor-arg : 생성자(set) / ref : 1.에서 만든 hikariConfig를 참조 -->
+		<constructor-arg ref="hikariConfig"/>
+	</bean>
+	
+	<!-- 3. SqlSessionFactoryBean 생성
+			: session 빌려오고, 사용하고, 반납하는 역할을 spring이 다 해줌. 
+			: mybatis-spring library 안쪽에 존재
+	 -->
+	 	<!-- id 따로 필요 없음. 왜냐면 spring이 사용하니까  -->
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	 
+	 <!-- 4. SqlSessionFactoryBean이 Mapper 인터페이스를 구현해야 함. 
+	 		 Mapper파일의 위치가 어디에 있는지 알려줘야한다. 
+	 		 *Mapper 파일은 테이블 단위로 만들어서 여러 개가 될 수 있기 때문에
+	 		  package 자체를 스캔하게 된다! 
+	 -->
+	 <!-- <mybatis-spring:scan> 태그의 base-package 속성은 지정된 패키지의 모든 MyBatis 관련 어노테이션을 찾아서 처리
+	 		==> com.smhrd.db인 BoardMapper
+	  -->
+	 <mybatis-spring:scan base-package="com.smhrd.db"/>
+	 
+	
+		
+</beans>
